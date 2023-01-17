@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -20,20 +21,20 @@ mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
   autoIndex: true,
 });
 
-const corsOptions = {
-  // credentials: true,
-  // origin: 'https://domainname.students.dasha.nomoredomains.club',
-  // origin: 'http://localhost:3000',
-  // origin(origin, callback) {
-  //   if (whitelist.indexOf(origin) !== -1) {
-  //     callback(null, true);
-  //   } else {
-  //     callback(new Error('Not allowed by CORS'));
-  //   }
-  // },
-};
+// const corsOptions = {
+//   credentials: true,
+// origin: 'https://api.domainname.students.dasha.nomoredomains.club',
+// origin: 'http://localhost:3000',
+// origin(origin, callback) {
+//   if (whitelist.indexOf(origin) !== -1) {
+//     callback(null, true);
+//   } else {
+//     callback(new Error('Not allowed by CORS'));
+//   }
+// },
+// };
 
-app.use(cors(corsOptions));
+app.use(cors());
 
 app.use(cookieParser());
 
@@ -61,11 +62,6 @@ app.post('/signin', celebrate({
 
 app.get('/signout', signOut);
 
-// app.use(celebrate({
-//   [Segments.HEADERS]: Joi.object({
-//     authorization: Joi.string().required().regex(/Bearer\s[a-z0-9._-]*/i),
-//   }).unknown(),
-// }));
 app.use('/', auth, UserRouter);
 app.use('/', auth, MoviesRouter);
 
