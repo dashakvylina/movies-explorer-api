@@ -12,7 +12,7 @@ const { createUser, login, signOut } = require('./controllers/users');
 const { auth } = require('./middlewares/auth');
 const { NotFoundError, commonError } = require('./errors');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-const { limiter } = require('./middlewares/rateLimiter');
+const limiter = require('./middlewares/rateLimiter');
 const { NOT_FOUND_ERROR_TEXT } = require('./constants');
 const { MONGODB_URL } = require('./config');
 
