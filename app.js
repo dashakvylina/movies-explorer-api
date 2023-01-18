@@ -1,4 +1,5 @@
 require('dotenv').config();
+const helmet = require('helmet');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -6,18 +7,27 @@ const { errors } = require('celebrate');
 const { Joi, celebrate, Segments } = require('celebrate');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const MoviesRouter = require('./routes/movies');
-const UserRouter = require('./routes/users');
+const Routes = require('./routes');
 const { createUser, login, signOut } = require('./controllers/users');
 const { auth } = require('./middlewares/auth');
-const { NotFoundError } = require('./errors');
+const { NotFoundError, commonError } = require('./errors');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { limiter } = require('./middlewares/rateLimiter');
+const { NOT_FOUND_ERROR_TEXT } = require('./constants');
+const { MONGODB_URL } = require('./config');
 
-const { PORT = 3000 } = process.env;
+const {
+  PORT = 3000, DB_NAME = 'bitfilmsdb', DB_URL, NODE_ENV,
+} = process.env;
+
+const dbUrl = NODE_ENV === 'production' ? DB_URL : MONGODB_URL;
 
 const app = express();
 
-mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
+app.use(helmet());
+app.use(limiter);
+
+mongoose.connect(`${dbUrl}/${DB_NAME}`, {
   autoIndex: true,
 });
 
@@ -62,25 +72,17 @@ app.post('/signin', celebrate({
 
 app.get('/signout', signOut);
 
-app.use('/', auth, UserRouter);
-app.use('/', auth, MoviesRouter);
+app.use('/', auth, Routes);
 
 app.use(auth, (req, res, next) => {
-  next(new NotFoundError('Такой страницы не существует!'));
+  next(new NotFoundError(NOT_FOUND_ERROR_TEXT));
 });
 
 app.use(errorLogger);
 
 app.use(errors());
 
-app.use((err, req, res, next) => {
-  if (!err.statusCode) {
-    res.status(500).send({ message: 'Unknown error' });
-  } else {
-    res.status(err.statusCode).send({ message: err.message });
-  }
-  next();
-});
+app.use(commonError);
 
 app.listen(PORT, () => {
   console.log('Server is running');

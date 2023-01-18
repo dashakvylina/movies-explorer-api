@@ -6,9 +6,15 @@ const {
   BadRequestError,
   DefaultError,
   NotFoundError,
-  // UnauthorizedError,
   ConflictError,
 } = require('../errors');
+const {
+  VALIDATION_ERROR_TEXT,
+  USER_NOT_ROUND_ERROR_TEXT,
+  INVALIDID_ERROR_TEXT,
+  UNKNOWN_ERROR_TEXT,
+  CONFLICT_ERROR_TEXT,
+} = require('../constants');
 
 const getMe = async (req, res, next) => {
   try {
@@ -16,7 +22,7 @@ const getMe = async (req, res, next) => {
 
     const result = await User.findById(user._id);
     if (result === null) {
-      throw new NotFoundError('user not found');
+      throw new NotFoundError(USER_NOT_ROUND_ERROR_TEXT);
     } else {
       res.status(OK_CODE).json(result);
     }
@@ -24,7 +30,7 @@ const getMe = async (req, res, next) => {
     console.log({ error });
 
     if (error.name === 'CastError') {
-      next(new BadRequestError('Unknown error'));
+      next(new BadRequestError(UNKNOWN_ERROR_TEXT));
     } else {
       next(error);
     }
@@ -46,11 +52,11 @@ const createUser = async (req, res, next) => {
     res.status(OK_CODE).json(data);
   } catch (error) {
     if (error.code === 11000) {
-      next(new ConflictError('Email exists'));
+      next(new ConflictError(CONFLICT_ERROR_TEXT));
     } else if (error.name === 'ValidationError') {
-      next(new BadRequestError('Data is not vallid'));
+      next(new BadRequestError(VALIDATION_ERROR_TEXT));
     } else {
-      next(new DefaultError('Unknown error'));
+      next(new DefaultError(UNKNOWN_ERROR_TEXT));
     }
   }
 };
@@ -64,17 +70,17 @@ const updateUser = async (req, res, next) => {
       { new: true, runValidators: true },
     );
     if (result === null) {
-      throw new NotFoundError('user not found');
+      throw new NotFoundError(USER_NOT_ROUND_ERROR_TEXT);
     } else {
       res.status(OK_CODE).json(result);
     }
   } catch (error) {
     if (error.name === 'ValidationError') {
-      next(new BadRequestError(('Name or about are not vallid')));
+      next(new BadRequestError((VALIDATION_ERROR_TEXT)));
     } else if (error.name === 'CastError') {
-      next(new BadRequestError(('Invalid id')));
+      next(new BadRequestError((INVALIDID_ERROR_TEXT)));
     } else {
-      next(new DefaultError(('Unknown error')));
+      next(new DefaultError((UNKNOWN_ERROR_TEXT)));
     }
   }
 };
@@ -94,7 +100,9 @@ const login = (req, res, next) => {
         },
       ).send({});
     })
-    .catch(next);
+    .catch((err) => {
+      next(err);
+    });
 };
 
 const signOut = (req, res) => {

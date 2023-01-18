@@ -8,6 +8,9 @@ const {
   NotFoundError,
   ForbiddenError,
 } = require('../errors');
+const {
+  DEFAULT_ERROR_TEXT, VALIDATION_ERROR_TEXT, NOT_FOUND_ERROR_TEXT, FORBIDDEN_ERROR_TEXT,
+} = require('../constants');
 
 const getMovies = async (req, res, next) => {
   try {
@@ -15,7 +18,7 @@ const getMovies = async (req, res, next) => {
     // const result = await Movies.find().populate(['owner likes']);
     res.status(OK_CODE).json(result);
   } catch (error) {
-    next(new DefaultError('Unknown error'));
+    next(new DefaultError(DEFAULT_ERROR_TEXT));
   }
 };
 
@@ -52,7 +55,7 @@ const createMovies = async (req, res, next) => {
   } catch (error) {
     console.log(error);
     if (error.name === 'ValidationError') {
-      next(new BadRequestError('Validator error'));
+      next(new BadRequestError(VALIDATION_ERROR_TEXT));
     } else {
       next(error);
     }
@@ -65,16 +68,16 @@ const deleteMovies = async (req, res, next) => {
     const { user } = req;
     const result = await Movies.findOne({ _id: movieId });
     if (result === null) {
-      throw new NotFoundError('Card not found');
+      throw new NotFoundError(NOT_FOUND_ERROR_TEXT);
     } else if (!result.owner.equals(user._id)) {
-      throw new ForbiddenError('only author can delete a card');
+      throw new ForbiddenError(FORBIDDEN_ERROR_TEXT);
     } else {
       const remRes = await result.remove();
       res.status(OK_CODE).json(remRes);
     }
   } catch (error) {
     if (error.name === 'CastError') {
-      next(new BadRequestError('Card id is not valid'));
+      next(new BadRequestError(VALIDATION_ERROR_TEXT));
     } else {
       next(error);
     }
