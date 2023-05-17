@@ -17,7 +17,7 @@ const { NOT_FOUND_ERROR_TEXT } = require('./constants');
 const { MONGODB_URL } = require('./config');
 
 const {
-  PORT = 3000, DB_NAME = 'bitfilmsdb', DB_URL, NODE_ENV,
+  PORT = 3001, DB_NAME = 'bitfilmsdb', DB_URL, NODE_ENV,
 } = process.env;
 
 const dbUrl = NODE_ENV === 'production' ? DB_URL : MONGODB_URL;
@@ -31,20 +31,20 @@ mongoose.connect(`${dbUrl}/${DB_NAME}`, {
   autoIndex: true,
 });
 
-// const corsOptions = {
-//   credentials: true,
-// origin: 'https://api.domainname.students.dasha.nomoredomains.club',
-// origin: 'http://localhost:3000',
-// origin(origin, callback) {
-//   if (whitelist.indexOf(origin) !== -1) {
-//     callback(null, true);
-//   } else {
-//     callback(new Error('Not allowed by CORS'));
-//   }
-// },
-// };
+const corsOptions = {
+  credentials: true,
+  // origin: 'https://api.domainname.students.dasha.nomoredomains.club',
+  origin: 'http://localhost:3000',
+  // origin(origin, callback) {
+  //   if (whitelist.indexOf(origin) !== -1) {
+  //     callback(null, true);
+  //   } else {
+  //     callback(new Error('Not allowed by CORS'));
+  //   }
+  // },
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use(cookieParser());
 

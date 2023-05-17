@@ -54,6 +54,11 @@ const moviesSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  apiId: {
+    type: Number,
+    required: true,
+    unique: true,
+  },
 });
 
 module.exports = mongoose.model('movie', moviesSchema);

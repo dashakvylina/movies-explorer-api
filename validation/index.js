@@ -21,7 +21,7 @@ const postMoviesValidate = (req, res, next) => {
 const deleteMoviesValidate = (req, res, next) => {
   celebrate({
     [Segments.PARAMS]: Joi.object().keys({
-      movieId: Joi.string().length(24).hex().required(),
+      movieId: Joi.number().required(),
     }),
   });
   next();

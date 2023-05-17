@@ -14,8 +14,8 @@ const {
 
 const getMovies = async (req, res, next) => {
   try {
-    const result = await Movies.find();
-    // const result = await Movies.find().populate(['owner likes']);
+    const { user } = req;
+    const result = await Movies.find({ owner: user._id });
     res.status(OK_CODE).json(result);
   } catch (error) {
     next(new DefaultError(DEFAULT_ERROR_TEXT));
@@ -36,6 +36,7 @@ const createMovies = async (req, res, next) => {
       nameRU,
       nameEN,
       thumbnail,
+      apiId
     } = body;
     const newMovie = new Movies({
       country,
@@ -49,6 +50,7 @@ const createMovies = async (req, res, next) => {
       nameEN,
       thumbnail,
       owner: user._id,
+      apiId
     });
     await newMovie.save();
     res.status(OK_CODE).json(newMovie);
@@ -66,7 +68,10 @@ const deleteMovies = async (req, res, next) => {
   try {
     const { movieId } = req.params;
     const { user } = req;
-    const result = await Movies.findOne({ _id: movieId });
+    console.log(user, movieId);
+
+    const result = await Movies.findOne({ apiId: movieId });
+
     if (result === null) {
       throw new NotFoundError(NOT_FOUND_ERROR_TEXT);
     } else if (!result.owner.equals(user._id)) {
